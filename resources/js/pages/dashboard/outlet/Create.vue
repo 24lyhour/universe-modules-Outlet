@@ -45,7 +45,7 @@ const form = useForm<OutletFormData>({
 // Use shared validation composable
 const { validateForm, validateAndSubmit, createIsFormInvalid } = useFormValidation(
     outletSchema,
-    ['name', 'outlet_type'] // Required fields
+    ['name', 'outlet_type'] 
 );
 
 // Get form data for validation
