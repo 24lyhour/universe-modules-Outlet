@@ -42,13 +42,12 @@ const form = useForm<OutletFormData>({
     schedule_status: '',
 });
 
-// Use shared validation composable
+
 const { validateForm, validateAndSubmit, createIsFormInvalid } = useFormValidation(
     outletSchema,
     ['name', 'outlet_type'] 
 );
 
-// Get form data for validation
 const getFormData = () => ({
     name: form.name,
     outlet_type: form.outlet_type,
