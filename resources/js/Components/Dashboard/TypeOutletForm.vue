@@ -54,21 +54,17 @@ const isActive = computed({
             </p>
         </div>
 
-        <div class="flex items-center justify-between">
-            <div class="space-y-0.5">
-                <Label for="status">Status</Label>
-                <p class="text-sm text-muted-foreground">
+        <div class="space-y-2">
+            <Label for="status">Status</Label>
+            <div class="flex items-center space-x-2 pt-2">
+                <Switch id="status" v-model="isActive" />
+                <Label for="status" class="font-normal">
                     {{ isActive ? 'Active' : 'Inactive' }}
-                </p>
+                </Label>
             </div>
-            <Switch
-                id="status"
-                :checked="isActive"
-                @update:checked="isActive = $event"
-            />
+            <p v-if="model.errors.status" class="text-sm text-destructive">
+                {{ model.errors.status }}
+            </p>
         </div>
-        <p v-if="model.errors.status" class="text-sm text-destructive">
-            {{ model.errors.status }}
-        </p>
     </div>
 </template>
