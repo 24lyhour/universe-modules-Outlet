@@ -3,7 +3,9 @@ import { ModalForm } from '@/components/shared';
 import TypeOutletForm from '../../../Components/Dashboard/TypeOutletForm.vue';
 import { useForm } from '@inertiajs/vue3';
 import { useModal } from 'momentum-modal';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
+import { typeOutletSchema } from '../../../validation/typeOutletSchema';
+import { useFormValidation } from '@/composables/useFormValidation';
 import type { TypeOutletFormData, TypeOutletEditProps } from '../../../types';
 
 const props = defineProps<TypeOutletEditProps>();
@@ -26,12 +28,33 @@ const form = useForm<TypeOutletFormData>({
     status: props.typeOutlet.status,
 });
 
+// Use shared validation composable
+const { validateForm, validateAndSubmit, createIsFormInvalid } = useFormValidation(
+    typeOutletSchema,
+    ['name'] // Required fields
+);
+
+// Get form data for validation
+const getFormData = () => ({
+    name: form.name,
+    description: form.description || null,
+    status: form.status,
+});
+
+// Watch form changes to validate in real-time
+watch(() => form.name, () => validateForm(getFormData()));
+
+// Check if form is valid for submit button state
+const isFormInvalid = createIsFormInvalid(getFormData);
+
 const handleSubmit = () => {
-    form.put(`/dashboard/outlet-types/${props.typeOutlet.id}`, {
-        onSuccess: () => {
-            close();
-            redirect();
-        },
+    validateAndSubmit(getFormData(), form, () => {
+        form.put(`/dashboard/outlet-types/${props.typeOutlet.id}`, {
+            onSuccess: () => {
+                close();
+                redirect();
+            },
+        });
     });
 };
 
@@ -50,6 +73,7 @@ const handleCancel = () => {
         size="md"
         submit-text="Save Changes"
         :loading="form.processing"
+        :disabled="isFormInvalid"
         @submit="handleSubmit"
         @cancel="handleCancel"
     >
