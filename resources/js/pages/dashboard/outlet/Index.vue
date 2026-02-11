@@ -1,0 +1,197 @@
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { TableReusable, StatsCard } from '@/components/shared';
+import type { TableColumn, TableAction, PaginationData } from '@/components/shared';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2 } from 'lucide-vue-next';
+import type { BreadcrumbItem } from '@/types';
+import type { OutletIndexProps, Outlet } from '../../../types';
+
+const props = defineProps<OutletIndexProps>();
+
+const { outlets, filters, stats } = props;
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Outlets', href: '/dashboard/outlets' },
+];
+
+const search = ref(props.filters.search || '');
+const statusFilter = ref(props.filters.status || 'all');
+
+const columns: TableColumn<Outlet>[] = [
+    {
+        key: 'name',
+        label: 'Outlet',
+        render: (outlet) => outlet.name,
+    },
+    {
+        key: 'outlet_type',
+        label: 'Type',
+        render: (outlet) => outlet.outlet_type || '-',
+    },
+    {
+        key: 'phone',
+        label: 'Phone',
+        render: (outlet) => outlet.phone || '-',
+    },
+    {
+        key: 'email',
+        label: 'Email',
+        render: (outlet) => outlet.email || '-',
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        render: (outlet) => outlet.status,
+    },
+];
+
+const actions: TableAction<Outlet>[] = [
+    {
+        label: 'View',
+        icon: Eye,
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}`),
+    },
+    {
+        label: 'Edit',
+        icon: Pencil,
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}/edit`),
+    },
+    {
+        label: 'Delete',
+        icon: Trash2,
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}/delete`),
+        variant: 'destructive',
+    },
+];
+
+const pagination: PaginationData = {
+    current_page: props.outlets.meta.current_page,
+    last_page: props.outlets.meta.last_page,
+    per_page: props.outlets.meta.per_page,
+    total: props.outlets.meta.total,
+};
+
+const handlePageChange = (page: number) => {
+    router.get('/dashboard/outlets', {
+        page,
+        per_page: pagination.per_page,
+        search: search.value || undefined,
+        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
+    }, { preserveState: true });
+};
+
+const handlePerPageChange = (perPage: number) => {
+    router.get('/dashboard/outlets', {
+        per_page: perPage,
+        search: search.value || undefined,
+        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
+    }, { preserveState: true });
+};
+
+const handleSearch = () => {
+    router.get('/dashboard/outlets', {
+        search: search.value || undefined,
+        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
+    }, { preserveState: true });
+};
+
+watch(statusFilter, () => {
+    router.get('/dashboard/outlets', {
+        search: search.value || undefined,
+        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
+    }, { preserveState: true });
+});
+
+const handleCreate = () => {
+    router.visit('/dashboard/outlets/create');
+};
+</script>
+
+<template>
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Outlets" />
+
+        <div class="flex h-full flex-1 flex-col gap-6 p-6">
+            <!-- Stats -->
+            <div class="grid gap-4 md:grid-cols-3">
+                <StatsCard
+                    title="Total Outlets"
+                    :value="stats.total"
+                    :icon="Store"
+                />
+                <StatsCard
+                    title="Active"
+                    :value="stats.active"
+                    :icon="CheckCircle"
+                    variant="success"
+                />
+                <StatsCard
+                    title="Inactive"
+                    :value="stats.inactive"
+                    :icon="XCircle"
+                    variant="warning"
+                />
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold">Outlets</h2>
+                        <p class="text-sm text-muted-foreground">Manage your outlets</p>
+                    </div>
+                    <Button @click="handleCreate">
+                        <Plus class="mr-2 h-4 w-4" />
+                        Add Outlet
+                    </Button>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-4">
+                    <div class="relative flex-1 max-w-sm">
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            v-model="search"
+                            placeholder="Search outlets..."
+                            class="pl-9"
+                            @keyup.enter="handleSearch"
+                        />
+                    </div>
+                    <Select v-model="statusFilter">
+                        <SelectTrigger class="w-[150px]">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <!-- Table -->
+                <TableReusable
+                    :data="outlets.data"
+                    :columns="columns"
+                    :actions="actions"
+                    :pagination="pagination"
+                    :searchable="false"
+                    @page-change="handlePageChange"
+                    @per-page-change="handlePerPageChange"
+                />
+            </div>
+        </div>
+    </AppLayout>
+</template>
