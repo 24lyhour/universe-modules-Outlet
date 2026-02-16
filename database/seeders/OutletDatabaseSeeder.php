@@ -11,6 +11,9 @@ class OutletDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            TypeOutletSeeder::class,
+            OutletSeeder::class,
+        ]);
     }
 }

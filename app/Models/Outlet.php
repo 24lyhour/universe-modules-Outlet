@@ -21,7 +21,7 @@ class Outlet extends Model
         'name',
         'address',
         'phone',
-        'outlet_type',
+        'type_outlet_id',
         'outlet_id',
         'image_url',
         'menu_id',
@@ -70,5 +70,13 @@ class Outlet extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Relation to the type outlet
+     */
+    public function typeOutlet()
+    {
+        return $this->belongsTo(TypeOutlet::class);
     }
 }
