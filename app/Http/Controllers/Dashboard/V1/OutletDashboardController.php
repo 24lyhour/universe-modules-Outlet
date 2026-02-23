@@ -22,7 +22,9 @@ class OutletDashboardController extends Controller
 {
     public function __construct(
         private OutletService $outletService
-    ) {}
+    ) {
+        // Authorization is handled by 'auto.permission' middleware in routes
+    }
 
     /**
      * Display a listing of outlets.

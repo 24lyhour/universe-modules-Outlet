@@ -2,13 +2,14 @@
 
 namespace Modules\Outlet\Models;
 
+use App\Traits\BelongsToOutlet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Outlet\Database\Factories\TypeOutletFactory;
 
 class TypeOutlet extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToOutlet;
 
     /**
      * The attributes that are mass assignable.

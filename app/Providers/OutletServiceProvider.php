@@ -46,12 +46,12 @@ class OutletServiceProvider extends ServiceProvider
                 url: route('outlet.outlets.index'),
                 icon: 'Building2',
                 order: 50,
-                permissions: null,
+                permissions: 'outlets.view_any',
                 route: 'outlet.*'
             );
 
-            MenuService::addSubmenuItem('primary', 'outlet', __('Outlets'), route('outlet.outlets.index'), 10, null, 'outlet.outlets.*', 'Building2');
-            MenuService::addSubmenuItem('primary', 'outlet', __('Outlet Types'), route('outlet.outlet-types.index'), 20, null, 'outlet.outlet-types.*', 'LayoutGrid');
+            MenuService::addSubmenuItem('primary', 'outlet', __('Outlets'), route('outlet.outlets.index'), 10, 'outlets.view_any', 'outlet.outlets.*', 'Building2');
+            MenuService::addSubmenuItem('primary', 'outlet', __('Outlet Types'), route('outlet.outlet-types.index'), 20, 'outlet_types.view_any', 'outlet.outlet-types.*', 'LayoutGrid');
         });
     }
 
