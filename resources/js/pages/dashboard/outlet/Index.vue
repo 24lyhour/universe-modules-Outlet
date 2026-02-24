@@ -13,7 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2 } from 'lucide-vue-next';
+import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, ImageOff } from 'lucide-vue-next';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
 
@@ -30,6 +31,11 @@ const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || 'all');
 
 const columns: TableColumn<Outlet>[] = [
+    {
+        key: 'logo',
+        label: 'Image',
+        width: '80px',
+    },
     {
         key: 'name',
         label: 'Outlet',
@@ -190,7 +196,21 @@ const handleCreate = () => {
                     :searchable="false"
                     @page-change="handlePageChange"
                     @per-page-change="handlePerPageChange"
-                />
+                >
+                    <template #cell-logo="{ item }">
+                        <Avatar class="h-10 w-10 rounded-md">
+                            <AvatarImage
+                                v-if="item.logo"
+                                :src="item.logo"
+                                :alt="item.name"
+                                class="object-cover"
+                            />
+                            <AvatarFallback class="rounded-md bg-muted">
+                                <ImageOff class="h-4 w-4 text-muted-foreground" />
+                            </AvatarFallback>
+                        </Avatar>
+                    </template>
+                </TableReusable>
             </div>
         </div>
     </AppLayout>
