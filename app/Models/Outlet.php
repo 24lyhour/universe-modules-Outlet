@@ -2,6 +2,7 @@
 
 namespace Modules\Outlet\Models;
 
+use App\Traits\HasUuid;
 use App\Traits\IsTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +10,7 @@ use Modules\Outlet\Database\Factories\OutletFactory;
 
 class Outlet extends Model
 {
-    use HasFactory, IsTenant;
+    use HasFactory, IsTenant, HasUuid;
 
     /**
      * The attributes that are mass assignable.
