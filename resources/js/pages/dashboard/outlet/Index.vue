@@ -13,8 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, ImageOff } from 'lucide-vue-next';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2 } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
 
@@ -198,17 +197,16 @@ const handleCreate = () => {
                     @per-page-change="handlePerPageChange"
                 >
                     <template #cell-logo="{ item }">
-                        <Avatar class="h-10 w-10 rounded-md">
-                            <AvatarImage
-                                v-if="item.logo"
+                        <div v-if="item.logo" class="h-10 w-10 overflow-hidden rounded-lg">
+                            <img
                                 :src="item.logo"
                                 :alt="item.name"
-                                class="object-cover"
+                                class="h-full w-full object-cover"
                             />
-                            <AvatarFallback class="rounded-md bg-muted">
-                                <ImageOff class="h-4 w-4 text-muted-foreground" />
-                            </AvatarFallback>
-                        </Avatar>
+                        </div>
+                        <div v-else class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <Store class="h-5 w-5 text-primary" />
+                        </div>
                     </template>
                 </TableReusable>
             </div>
