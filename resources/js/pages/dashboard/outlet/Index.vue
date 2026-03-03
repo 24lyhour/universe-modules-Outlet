@@ -13,7 +13,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, Clock } from 'lucide-vue-next';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, Clock, CalendarClock } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
 
@@ -58,6 +60,10 @@ const columns: TableColumn<Outlet>[] = [
         key: 'email',
         label: 'Email',
         render: (outlet) => outlet.email || '-',
+    },
+    {
+        key: 'schedule',
+        label: 'Schedule',
     },
     {
         key: 'status',
@@ -130,6 +136,15 @@ watch(statusFilter, () => {
 
 const handleCreate = () => {
     router.visit('/dashboard/outlets/create');
+};
+
+const handleStatusToggle = (outlet: Outlet, newStatus: boolean) => {
+    router.put(`/dashboard/outlets/${outlet.uuid}/toggle-status`, {
+        status: newStatus ? 'active' : 'inactive',
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -214,6 +229,37 @@ const handleCreate = () => {
                     </div>
                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                         <Store class="h-5 w-5 text-primary" />
+                    </div>
+                </template>
+                <template #cell-schedule="{ item }">
+                    <Badge
+                        v-if="item.schedule_status === 'active'"
+                        variant="default"
+                        class="gap-1.5 cursor-pointer hover:bg-primary/80 transition-colors"
+                        @click.stop="router.visit(`/dashboard/outlets/${item.uuid}/schedule`)"
+                    >
+                        <CalendarClock class="h-3 w-3" />
+                        {{ item.schedule_mode === 'always' ? 'Always' : item.schedule_start_time ? `${item.schedule_start_time} - ${item.schedule_end_time}` : 'Configured' }}
+                    </Badge>
+                    <Badge
+                        v-else
+                        variant="outline"
+                        class="gap-1.5 cursor-pointer hover:bg-muted transition-colors text-muted-foreground"
+                        @click.stop="router.visit(`/dashboard/outlets/${item.uuid}/schedule`)"
+                    >
+                        <Clock class="h-3 w-3" />
+                        Not Set
+                    </Badge>
+                </template>
+                <template #cell-status="{ item }">
+                    <div class="flex items-center gap-2" @click.stop>
+                        <Switch
+                            :model-value="item.status === 'active'"
+                            @update:model-value="handleStatusToggle(item, $event)"
+                        />
+                        <span class="text-sm text-muted-foreground">
+                            {{ item.status === 'active' ? 'Active' : 'Inactive' }}
+                        </span>
                     </div>
                 </template>
             </TableReusable>
