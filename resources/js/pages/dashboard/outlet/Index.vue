@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { TableReusable, StatsCard } from '@/components/shared';
@@ -33,7 +33,6 @@ const statusFilter = ref(props.filters.status || 'all');
 // Schedule modal state
 const scheduleModalOpen = ref(false);
 const selectedOutlet = ref<Outlet | null>(null);
-const scheduleLoading = ref(false);
 
 const columns: TableColumn<Outlet>[] = [
     {
@@ -140,53 +139,8 @@ const openScheduleModal = (outlet: Outlet) => {
     scheduleModalOpen.value = true;
 };
 
-const scheduleData = computed(() => {
-    if (!selectedOutlet.value) {
-        return {
-            schedule_mode: '',
-            schedule_days: '',
-            schedule_start_time: '',
-            schedule_end_time: '',
-            schedule_start_date: '',
-            schedule_end_date: '',
-            schedule_status: '',
-        };
-    }
-    return {
-        schedule_mode: selectedOutlet.value.schedule_mode || '',
-        schedule_days: selectedOutlet.value.schedule_days || '',
-        schedule_start_time: selectedOutlet.value.schedule_start_time || '',
-        schedule_end_time: selectedOutlet.value.schedule_end_time || '',
-        schedule_start_date: selectedOutlet.value.schedule_start_date || '',
-        schedule_end_date: selectedOutlet.value.schedule_end_date || '',
-        schedule_status: selectedOutlet.value.schedule_status || '',
-    };
-});
-
-interface ScheduleData {
-    schedule_mode: string;
-    schedule_days: string;
-    schedule_start_time: string;
-    schedule_end_time: string;
-    schedule_start_date: string;
-    schedule_end_date: string;
-    schedule_status: string;
-}
-
-const handleScheduleSave = (data: ScheduleData) => {
-    if (!selectedOutlet.value) return;
-
-    scheduleLoading.value = true;
-    router.put(`/dashboard/outlets/${selectedOutlet.value.id}/schedule`, data, {
-        preserveScroll: true,
-        onSuccess: () => {
-            scheduleModalOpen.value = false;
-            selectedOutlet.value = null;
-        },
-        onFinish: () => {
-            scheduleLoading.value = false;
-        },
-    });
+const handleScheduleSaved = () => {
+    selectedOutlet.value = null;
 };
 </script>
 
@@ -281,9 +235,8 @@ const handleScheduleSave = (data: ScheduleData) => {
         <!-- Schedule Manage -->
         <ScheduleManage
             v-model:open="scheduleModalOpen"
-            :schedule-data="scheduleData"
-            :loading="scheduleLoading"
-            @save="handleScheduleSave"
+            :outlet="selectedOutlet"
+            @saved="handleScheduleSaved"
         />
     </AppLayout>
 </template>

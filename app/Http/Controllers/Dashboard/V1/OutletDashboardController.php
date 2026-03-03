@@ -135,26 +135,4 @@ class OutletDashboardController extends Controller
             ->route('outlet.outlets.index')
             ->with('success', 'Outlet deleted successfully.');
     }
-
-    /**
-     * Update outlet schedule.
-     */
-    public function updateSchedule(Request $request, Outlet $outlet): RedirectResponse
-    {
-        $validated = $request->validate([
-            'schedule_mode' => ['nullable', 'string', 'in:always,daily,weekly,date_range'],
-            'schedule_days' => ['nullable', 'string'],
-            'schedule_start_time' => ['nullable', 'string'],
-            'schedule_end_time' => ['nullable', 'string'],
-            'schedule_start_date' => ['nullable', 'date'],
-            'schedule_end_date' => ['nullable', 'date'],
-            'schedule_status' => ['nullable', 'string', 'in:active,inactive'],
-        ]);
-
-        $outlet->update($validated);
-
-        return redirect()
-            ->route('outlet.outlets.index')
-            ->with('success', 'Schedule updated successfully.');
-    }
 }

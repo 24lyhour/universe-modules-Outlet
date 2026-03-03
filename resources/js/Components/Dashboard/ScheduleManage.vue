@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { ModalForm } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,31 +15,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-
-interface ScheduleData {
-    schedule_mode: string;
-    schedule_days: string;
-    schedule_start_time: string;
-    schedule_end_time: string;
-    schedule_start_date: string;
-    schedule_end_date: string;
-    schedule_status: string;
-}
+import type { Outlet } from '@outlet/types';
 
 interface Props {
-    scheduleData: ScheduleData;
-    loading?: boolean;
+    outlet: Outlet | null;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    loading: false,
-});
+const props = defineProps<Props>();
 
 const open = defineModel<boolean>('open', { default: false });
 
 const emit = defineEmits<{
-    (e: 'save', data: ScheduleData): void;
+    (e: 'saved'): void;
 }>();
+
+const loading = ref(false);
 
 const DAYS_OF_WEEK = [
     { value: 'monday', label: 'Mon' },
@@ -58,7 +49,7 @@ const SCHEDULE_MODES = [
 ];
 
 // Local state
-const localData = ref<ScheduleData>({
+const localData = ref({
     schedule_mode: '',
     schedule_days: '',
     schedule_start_time: '',
@@ -70,15 +61,25 @@ const localData = ref<ScheduleData>({
 
 const selectedDays = ref<string[]>([]);
 
-// Watch for prop changes to sync local state
-watch(() => props.scheduleData, (newVal) => {
-    localData.value = { ...newVal };
-    // Parse days from JSON string or comma-separated string
-    try {
-        const days = newVal.schedule_days ? JSON.parse(newVal.schedule_days) : [];
-        selectedDays.value = Array.isArray(days) ? days : [];
-    } catch {
-        selectedDays.value = newVal.schedule_days ? newVal.schedule_days.split(',') : [];
+// Watch for outlet prop changes to sync local state
+watch(() => props.outlet, (outlet) => {
+    if (outlet) {
+        localData.value = {
+            schedule_mode: outlet.schedule_mode || '',
+            schedule_days: outlet.schedule_days || '',
+            schedule_start_time: outlet.schedule_start_time || '',
+            schedule_end_time: outlet.schedule_end_time || '',
+            schedule_start_date: outlet.schedule_start_date || '',
+            schedule_end_date: outlet.schedule_end_date || '',
+            schedule_status: outlet.schedule_status || '',
+        };
+        // Parse days from JSON string
+        try {
+            const days = outlet.schedule_days ? JSON.parse(outlet.schedule_days) : [];
+            selectedDays.value = Array.isArray(days) ? days : [];
+        } catch {
+            selectedDays.value = outlet.schedule_days ? outlet.schedule_days.split(',') : [];
+        }
     }
 }, { immediate: true });
 
@@ -105,10 +106,25 @@ const selectedModeInfo = computed(() => {
 });
 
 const handleSubmit = () => {
+    if (!props.outlet) return;
+
     // Convert selected days to JSON string
-    localData.value.schedule_days = JSON.stringify(selectedDays.value);
-    emit('save', { ...localData.value });
-    open.value = false;
+    const data = {
+        ...localData.value,
+        schedule_days: JSON.stringify(selectedDays.value),
+    };
+
+    loading.value = true;
+    router.put(`/dashboard/outlets/${props.outlet.id}/schedule`, data, {
+        preserveScroll: true,
+        onSuccess: () => {
+            open.value = false;
+            emit('saved');
+        },
+        onFinish: () => {
+            loading.value = false;
+        },
+    });
 };
 
 const handleCancel = () => {
