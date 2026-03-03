@@ -79,7 +79,7 @@ const isFormInvalid = createIsFormInvalid(getFormData);
 
 const handleSubmit = () => {
     validateAndSubmit(getFormData(), form, () => {
-        form.put(`/dashboard/outlets/${props.outlet.id}`, {
+        form.put(`/dashboard/outlets/${props.outlet.uuid}`, {
             onSuccess: () => {
                 close();
                 redirect();

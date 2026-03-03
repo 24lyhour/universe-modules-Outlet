@@ -115,7 +115,7 @@ const handleSubmit = () => {
     };
 
     loading.value = true;
-    router.put(`/dashboard/outlets/${props.outlet.id}/schedule`, data, {
+    router.put(`/dashboard/outlets/${props.outlet.uuid}/schedule`, data, {
         preserveScroll: true,
         onSuccess: () => {
             open.value = false;

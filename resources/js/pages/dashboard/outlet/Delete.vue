@@ -39,7 +39,7 @@ const handleConfirmedChange = (value: boolean | 'indeterminate') => {
 };
 
 const handleSubmit = () => {
-    form.delete(`/dashboard/outlets/${props.outlet.id}`, {
+    form.delete(`/dashboard/outlets/${props.outlet.uuid}`, {
         onSuccess: () => {
             close();
             redirect();

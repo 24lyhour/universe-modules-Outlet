@@ -60,11 +60,11 @@ const handleBack = () => {
 };
 
 const handleEdit = () => {
-    router.visit(`/dashboard/outlets/${props.outlet.id}/edit`);
+    router.visit(`/dashboard/outlets/${props.outlet.uuid}/edit`);
 };
 
 const handleDelete = () => {
-    router.visit(`/dashboard/outlets/${props.outlet.id}/delete`);
+    router.visit(`/dashboard/outlets/${props.outlet.uuid}/delete`);
 };
 </script>
 
