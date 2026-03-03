@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -15,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { ImageUpload } from '@/components/shared';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { OutletFormData, TypeOutletOption } from '../../types';
+import TiptapEditor from '@/components/TiptapEditor.vue';
 
 interface Props {
     mode?: 'create' | 'edit';
@@ -120,16 +120,31 @@ const isActive = computed({
 
                 <div class="space-y-2 sm:col-span-2">
                     <Label for="address">Address</Label>
-                    <Textarea
-                        id="address"
+                    <TiptapEditor
                         v-model="model.address"
                         placeholder="Enter outlet address"
-                        rows="2"
+                        min-height="250px"
+                        max-height="400px"
                     />
                     <p v-if="model.errors.address" class="text-sm text-destructive">
                         {{ model.errors.address }}
                     </p>
                 </div>
+
+                <div class="space-y-2 sm:col-span-2">
+                    <Label for="description">Description</Label>
+                    <TiptapEditor
+                        v-model="model.description"
+                        placeholder="Enter outlet description"
+                        min-height="250px"
+                        max-height="400px"
+                    />
+                    <p v-if="model.errors.description" class="text-sm text-destructive">
+                        {{ model.errors.description }}
+                    </p>
+                </div>
+
+
 
                 <div class="space-y-2">
                     <Label for="status">Status <span class="text-destructive">*</span></Label>

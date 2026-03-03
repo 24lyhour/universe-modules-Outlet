@@ -2,10 +2,10 @@
 import { computed } from 'vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { TypeOutletFormData } from '../../types';
+import TiptapEditor from '@/components/TiptapEditor.vue';
 
 interface Props {
     mode?: 'create' | 'edit';
@@ -43,11 +43,11 @@ const isActive = computed({
 
         <div class="space-y-2">
             <Label for="description">Description</Label>
-            <Textarea
-                id="description"
+            <TiptapEditor
                 v-model="model.description"
                 placeholder="Enter description"
-                rows="3"
+                max-height="400px"
+                min-height="250px"
             />
             <p v-if="model.errors.description" class="text-sm text-destructive">
                 {{ model.errors.description }}

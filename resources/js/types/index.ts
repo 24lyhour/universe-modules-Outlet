@@ -10,6 +10,7 @@ export interface Outlet {
     uuid: string;
     name: string;
     outlet_type: string | null;
+    description:string | null;
     address: string | null;
     phone: string | null;
     email: string | null;
@@ -57,6 +58,7 @@ export interface OutletFilters {
 export interface OutletFormData {
     name: string;
     outlet_type: string;
+    description: string;
     address: string;
     phone: string;
     email: string;

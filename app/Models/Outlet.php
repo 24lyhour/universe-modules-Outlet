@@ -20,6 +20,7 @@ class Outlet extends Model
         'tenant_type',
         'tenant_id',
         'company_id',
+        'description',
         'name',
         'address',
         'phone',
