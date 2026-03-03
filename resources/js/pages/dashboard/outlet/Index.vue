@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed, type VNode } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { TableReusable, StatsCard } from '@/components/shared';
@@ -16,23 +16,22 @@ import {
 import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, Clock } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
-import ScheduleManage from '../../../Components/Dashboard/ScheduleManage.vue';
+
+// Persistent layout for momentum-modal
+defineOptions({
+    layout: (h: (type: unknown, props: unknown, children: unknown) => VNode, page: VNode) =>
+        h(AppLayout, {
+            breadcrumbs: [
+                { title: 'Dashboard', href: '/dashboard' },
+                { title: 'Outlets', href: '/dashboard/outlets' },
+            ] as BreadcrumbItem[]
+        }, () => page),
+});
 
 const props = defineProps<OutletIndexProps>();
 
-const { outlets, filters, stats } = props;
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Outlets', href: '/dashboard/outlets' },
-];
-
 const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || 'all');
-
-// Schedule modal state
-const scheduleModalOpen = ref(false);
-const selectedOutlet = ref<Outlet | null>(null);
 
 const columns: TableColumn<Outlet>[] = [
     {
@@ -71,37 +70,37 @@ const actions: TableAction<Outlet>[] = [
     {
         label: 'View',
         icon: Eye,
-        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}`),
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}`),
     },
     {
         label: 'Edit',
         icon: Pencil,
-        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}/edit`),
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}/edit`),
     },
     {
         label: 'Schedule',
         icon: Clock,
-        onClick: (outlet) => openScheduleModal(outlet),
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}/schedule`),
     },
     {
         label: 'Delete',
         icon: Trash2,
-        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.id}/delete`),
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}/delete`),
         variant: 'destructive',
     },
 ];
 
-const pagination: PaginationData = {
+const pagination = computed<PaginationData>(() => ({
     current_page: props.outlets.meta.current_page,
     last_page: props.outlets.meta.last_page,
     per_page: props.outlets.meta.per_page,
     total: props.outlets.meta.total,
-};
+}));
 
 const handlePageChange = (page: number) => {
     router.get('/dashboard/outlets', {
         page,
-        per_page: pagination.per_page,
+        per_page: pagination.value.per_page,
         search: search.value || undefined,
         status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
     }, { preserveState: true });
@@ -132,111 +131,92 @@ watch(statusFilter, () => {
 const handleCreate = () => {
     router.visit('/dashboard/outlets/create');
 };
-
-// Schedule modal functions
-const openScheduleModal = (outlet: Outlet) => {
-    selectedOutlet.value = outlet;
-    scheduleModalOpen.value = true;
-};
-
-const handleScheduleSaved = () => {
-    selectedOutlet.value = null;
-};
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="Outlets" />
+    <Head title="Outlets" />
 
-        <div class="flex h-full flex-1 flex-col gap-6 p-6">
-            <!-- Stats -->
-            <div class="grid gap-4 md:grid-cols-3">
-                <StatsCard
-                    title="Total Outlets"
-                    :value="stats.total"
-                    :icon="Store"
-                />
-                <StatsCard
-                    title="Active"
-                    :value="stats.active"
-                    :icon="CheckCircle"
-                    variant="success"
-                />
-                <StatsCard
-                    title="Inactive"
-                    :value="stats.inactive"
-                    :icon="XCircle"
-                    variant="warning"
-                />
-            </div>
-
-            <!-- Main Content -->
-            <div class="flex flex-col gap-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold">Outlets</h2>
-                        <p class="text-sm text-muted-foreground">Manage your outlets</p>
-                    </div>
-                    <Button @click="handleCreate">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Outlet
-                    </Button>
-                </div>
-
-                <!-- Filters -->
-                <div class="flex items-center gap-4">
-                    <div class="relative flex-1 max-w-sm">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            v-model="search"
-                            placeholder="Search outlets..."
-                            class="pl-9"
-                            @keyup.enter="handleSearch"
-                        />
-                    </div>
-                    <Select v-model="statusFilter">
-                        <SelectTrigger class="w-[150px]">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <!-- Table -->
-                <TableReusable
-                    :data="outlets.data"
-                    :columns="columns"
-                    :actions="actions"
-                    :pagination="pagination"
-                    :searchable="false"
-                    @page-change="handlePageChange"
-                    @per-page-change="handlePerPageChange"
-                >
-                    <template #cell-logo="{ item }">
-                        <div v-if="item.logo" class="h-10 w-10 overflow-hidden rounded-lg">
-                            <img
-                                :src="item.logo"
-                                :alt="item.name"
-                                class="h-full w-full object-cover"
-                            />
-                        </div>
-                        <div v-else class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Store class="h-5 w-5 text-primary" />
-                        </div>
-                    </template>
-                </TableReusable>
-            </div>
+    <div class="flex h-full flex-1 flex-col gap-6 p-6">
+        <!-- Stats -->
+        <div class="grid gap-4 md:grid-cols-3">
+            <StatsCard
+                title="Total Outlets"
+                :value="props.outlets.meta.total"
+                :icon="Store"
+            />
+            <StatsCard
+                title="Active"
+                :value="props.stats.active"
+                :icon="CheckCircle"
+                variant="success"
+            />
+            <StatsCard
+                title="Inactive"
+                :value="props.stats.inactive"
+                :icon="XCircle"
+                variant="warning"
+            />
         </div>
 
-        <!-- Schedule Manage -->
-        <ScheduleManage
-            v-model:open="scheduleModalOpen"
-            :outlet="selectedOutlet"
-            @saved="handleScheduleSaved"
-        />
-    </AppLayout>
+        <!-- Main Content -->
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold">Outlets</h2>
+                    <p class="text-sm text-muted-foreground">Manage your outlets</p>
+                </div>
+                <Button @click="handleCreate">
+                    <Plus class="mr-2 h-4 w-4" />
+                    Add Outlet
+                </Button>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex items-center gap-4">
+                <div class="relative flex-1 max-w-sm">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        v-model="search"
+                        placeholder="Search outlets..."
+                        class="pl-9"
+                        @keyup.enter="handleSearch"
+                    />
+                </div>
+                <Select v-model="statusFilter">
+                    <SelectTrigger class="w-[150px]">
+                        <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <!-- Table -->
+            <TableReusable
+                :data="props.outlets.data"
+                :columns="columns"
+                :actions="actions"
+                :pagination="pagination"
+                :searchable="false"
+                @page-change="handlePageChange"
+                @per-page-change="handlePerPageChange"
+            >
+                <template #cell-logo="{ item }">
+                    <div v-if="item.logo" class="h-10 w-10 overflow-hidden rounded-lg">
+                        <img
+                            :src="item.logo"
+                            :alt="item.name"
+                            class="h-full w-full object-cover"
+                        />
+                    </div>
+                    <div v-else class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <Store class="h-5 w-5 text-primary" />
+                    </div>
+                </template>
+            </TableReusable>
+        </div>
+    </div>
 </template>

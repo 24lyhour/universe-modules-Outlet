@@ -13,6 +13,14 @@ class Outlet extends Model
     use HasFactory, IsTenant, HasUuid;
 
     /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
