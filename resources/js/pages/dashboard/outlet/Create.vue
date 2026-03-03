@@ -25,6 +25,7 @@ const isOpen = computed({
 const form = useForm<OutletFormData>({
     name: '',
     outlet_type: '',
+    description: '',
     address: '',
     phone: '',
     email: '',
@@ -51,6 +52,7 @@ const { validateForm, validateAndSubmit, createIsFormInvalid } = useFormValidati
 const getFormData = () => ({
     name: form.name,
     outlet_type: form.outlet_type,
+    description: form.description || null,
     address: form.address || null,
     phone: form.phone || null,
     email: form.email || null,

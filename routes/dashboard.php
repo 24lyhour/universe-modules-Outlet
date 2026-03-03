@@ -8,6 +8,7 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     // Outlets
     Route::resource('outlets', OutletDashboardController::class)->names('outlets');
     Route::get('outlets/{outlet}/delete', [OutletDashboardController::class, 'confirmDelete'])->name('outlets.confirm-delete');
+    Route::put('outlets/{outlet}/schedule', [OutletDashboardController::class, 'updateSchedule'])->name('outlets.update-schedule');
 
     // Outlet Types
     Route::resource('outlet-types', TypeOutletDashboardController::class)->names('outlet-types');
