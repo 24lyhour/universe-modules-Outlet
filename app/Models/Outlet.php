@@ -90,4 +90,13 @@ class Outlet extends Model
     {
         return $this->belongsTo(TypeOutlet::class);
     }
+
+    /**
+     * relation to the prodcut type
+     */
+    public function productType() 
+    {
+    
+        return $this->belongTo(ProductType::class);
+    }
 }
