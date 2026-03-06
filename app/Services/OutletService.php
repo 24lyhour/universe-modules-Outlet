@@ -3,6 +3,7 @@
 namespace Modules\Outlet\Services;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Outlet\Models\Outlet;
 
@@ -51,7 +52,10 @@ class OutletService
     {
         $data['uuid'] = (string) Str::uuid();
 
-        return Outlet::create($data);
+        $outlet = Outlet::create($data);
+        $this->clearStatsCache();
+
+        return $outlet;
     }
 
     /**
@@ -60,6 +64,7 @@ class OutletService
     public function update(Outlet $outlet, array $data): Outlet
     {
         $outlet->update($data);
+        $this->clearStatsCache();
 
         return $outlet->fresh();
     }
@@ -69,19 +74,32 @@ class OutletService
      */
     public function delete(Outlet $outlet): bool
     {
-        return $outlet->delete();
+        $result = $outlet->delete();
+        $this->clearStatsCache();
+
+        return $result;
     }
 
     /**
-     * Get outlet statistics.
+     * Get outlet statistics (cached for 5 minutes).
      */
     public function getStats(): array
     {
-        return [
-            'total'     => Outlet::count(),
-            'active'    => Outlet::where('status', 'active')->count(),
-            'inactive'  => Outlet::where('status', 'inactive')->count(),
-        ];
+        return Cache::remember('outlet_stats', 300, function () {
+            return [
+                'total'     => Outlet::count(),
+                'active'    => Outlet::where('status', 'active')->count(),
+                'inactive'  => Outlet::where('status', 'inactive')->count(),
+            ];
+        });
+    }
+
+    /**
+     * Clear outlet stats cache.
+     */
+    public function clearStatsCache(): void
+    {
+        Cache::forget('outlet_stats');
     }
 
     /**
@@ -91,6 +109,7 @@ class OutletService
     {
         $outlet->status = $status;
         $outlet->save();
+        $this->clearStatsCache();
 
         return $outlet;
     }

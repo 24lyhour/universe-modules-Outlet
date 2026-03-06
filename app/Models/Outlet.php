@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Menu\Models\Menu;
 use Modules\Outlet\Database\Factories\OutletFactory;
 use Modules\Product\Models\Product;
@@ -16,7 +17,7 @@ use Modules\Product\Models\ProductType;
 
 class Outlet extends Model
 {
-    use HasFactory, IsTenant, HasUuid;
+    use HasFactory, IsTenant, HasUuid, SoftDeletes;
 
     /**
      * Get the route key for the model.

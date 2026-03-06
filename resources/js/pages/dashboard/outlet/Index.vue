@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, computed, type VNode } from 'vue';
+import { ref, computed, type VNode } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { TableReusable, StatsCard } from '@/components/shared';
 import type { TableColumn, TableAction, PaginationData } from '@/components/shared';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -15,7 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Store, CheckCircle, XCircle, Search, Eye, Pencil, Trash2, Clock, CalendarClock } from 'lucide-vue-next';
+import { Plus, Store, CheckCircle, XCircle, Eye, Pencil, Trash2, Clock, CalendarClock, X, Download, Database } from 'lucide-vue-next';
+import { ButtonGroup } from '@/components/shared';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
 import { toast } from '@/composables/useToast';
@@ -33,8 +33,13 @@ defineOptions({
 
 const props = defineProps<OutletIndexProps>();
 
-const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || 'all');
+// Filter state
+const searchQuery = ref(props.filters.search || '');
+const statusFilter = ref(props.filters.status || '');
+const typeOutletFilter = ref(props.filters.type_outlet_id?.toString() || '');
+
+// Selection state for bulk operations
+const selectedUuids = ref<(string | number)[]>([]);
 
 const columns: TableColumn<Outlet>[] = [
     {
@@ -108,35 +113,74 @@ const handlePageChange = (page: number) => {
     router.get('/dashboard/outlets', {
         page,
         per_page: pagination.value.per_page,
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: searchQuery.value || undefined,
+        status: statusFilter.value || undefined,
+        type_outlet_id: typeOutletFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
 const handlePerPageChange = (perPage: number) => {
     router.get('/dashboard/outlets', {
+        page: 1,
         per_page: perPage,
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: searchQuery.value || undefined,
+        status: statusFilter.value || undefined,
+        type_outlet_id: typeOutletFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
-const handleSearch = () => {
+const handleSearch = (search: string) => {
+    searchQuery.value = search;
     router.get('/dashboard/outlets', {
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: search || undefined,
+        status: statusFilter.value || undefined,
+        type_outlet_id: typeOutletFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
-watch(statusFilter, () => {
+const handleStatusFilter = (status: string | number | boolean | bigint | Record<string, unknown> | null | undefined) => {
+    const statusStr = String(status || 'all');
+    statusFilter.value = statusStr === 'all' ? '' : statusStr;
     router.get('/dashboard/outlets', {
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: searchQuery.value || undefined,
+        status: statusStr === 'all' ? undefined : statusStr,
+        type_outlet_id: typeOutletFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
+};
+
+const handleTypeOutletFilter = (typeId: string | number | boolean | bigint | Record<string, unknown> | null | undefined) => {
+    const typeStr = String(typeId || 'all');
+    const actualId = typeStr === 'all' ? '' : typeStr;
+    typeOutletFilter.value = actualId;
+    router.get('/dashboard/outlets', {
+        search: searchQuery.value || undefined,
+        status: statusFilter.value || undefined,
+        type_outlet_id: actualId || undefined,
+    }, { preserveState: true, preserveScroll: true });
+};
+
+// Check if any filters are active
+const hasActiveFilters = computed(() => {
+    return !!(searchQuery.value || statusFilter.value || typeOutletFilter.value);
 });
+
+const handleClearFilters = () => {
+    searchQuery.value = '';
+    statusFilter.value = '';
+    typeOutletFilter.value = '';
+    router.get('/dashboard/outlets', {}, { preserveState: true, preserveScroll: true });
+};
 
 const handleCreate = () => {
     router.visit('/dashboard/outlets/create');
+};
+
+const openBulkDeleteDialog = () => {
+    const params = new URLSearchParams();
+    selectedUuids.value.forEach((uuid) => {
+        params.append('uuids[]', String(uuid));
+    });
+    router.visit(`/dashboard/outlets/bulk-delete?${params.toString()}`);
 };
 
 const handleStatusToggle = (outlet: Outlet, newStatus: boolean) => {
@@ -185,45 +229,96 @@ const handleStatusToggle = (outlet: Outlet, newStatus: boolean) => {
                     <h2 class="text-lg font-semibold">Outlets</h2>
                     <p class="text-sm text-muted-foreground">Manage your outlets</p>
                 </div>
-                <Button @click="handleCreate">
-                    <Plus class="mr-2 h-4 w-4" />
-                    Add Outlet
-                </Button>
-            </div>
-
-            <!-- Filters -->
-            <div class="flex items-center gap-4">
-                <div class="relative flex-1 max-w-sm">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        v-model="search"
-                        placeholder="Search outlets..."
-                        class="pl-9"
-                        @keyup.enter="handleSearch"
-                    />
+                <div class="flex items-center gap-2">
+                    <ButtonGroup>
+                        <Button variant="default">
+                            <Database class="mr-2 h-4 w-4" />
+                            All
+                        </Button>
+                        <Button variant="outline" @click="router.visit('/dashboard/outlets/trash')">
+                            <Trash2 class="mr-2 h-4 w-4" />
+                            Trash
+                        </Button>
+                    </ButtonGroup>
+                    <Button variant="outline" as="a" href="/dashboard/outlets/export">
+                        <Download class="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
+                    <Button @click="handleCreate">
+                        <Plus class="mr-2 h-4 w-4" />
+                        Add Outlet
+                    </Button>
                 </div>
-                <Select v-model="statusFilter">
-                    <SelectTrigger class="w-[150px]">
-                        <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
 
             <!-- Table -->
             <TableReusable
+                v-model:selected="selectedUuids"
                 :data="props.outlets.data"
                 :columns="columns"
                 :actions="actions"
                 :pagination="pagination"
-                :searchable="false"
+                :searchable="true"
+                :selectable="true"
+                select-key="uuid"
+                search-placeholder="Search outlets..."
                 @page-change="handlePageChange"
                 @per-page-change="handlePerPageChange"
+                @search="handleSearch"
             >
+                <!-- Bulk Actions -->
+                <template #bulk-actions>
+                    <Button variant="destructive" size="sm" @click="openBulkDeleteDialog">
+                        <Trash2 class="mr-2 h-4 w-4" />
+                        Delete Selected
+                    </Button>
+                </template>
+
+                <!-- Toolbar slot for filters -->
+                <template #toolbar>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Type Outlet Filter -->
+                        <Select :model-value="typeOutletFilter || 'all'" @update:model-value="handleTypeOutletFilter">
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem
+                                    v-for="type in props.typeOutlets"
+                                    :key="type.id"
+                                    :value="type.id.toString()"
+                                >
+                                    {{ type.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <!-- Status Filter -->
+                        <Select :model-value="statusFilter || 'all'" @update:model-value="handleStatusFilter">
+                            <SelectTrigger class="w-[150px]">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <!-- Clear Filters Button -->
+                        <Button
+                            v-if="hasActiveFilters"
+                            variant="ghost"
+                            size="sm"
+                            @click="handleClearFilters"
+                            class="text-muted-foreground hover:text-foreground"
+                        >
+                            <X class="mr-1 h-4 w-4" />
+                            Clear Filters
+                        </Button>
+                    </div>
+                </template>
                 <template #cell-logo="{ item }">
                     <div v-if="item.logo" class="h-10 w-10 overflow-hidden rounded-lg">
                         <img

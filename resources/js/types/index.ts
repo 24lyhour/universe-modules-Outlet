@@ -60,6 +60,7 @@ export interface PaginatedResponse<T> {
 export interface OutletFilters {
     status?: string;
     search?: string;
+    type_outlet_id?: number;
 }
 
 export interface OutletFormData {
@@ -87,6 +88,7 @@ export interface OutletIndexProps {
     outlets: PaginatedResponse<Outlet>;
     filters: OutletFilters;
     stats: OutletStats;
+    typeOutlets?: TypeOutletOption[];
 }
 
 export interface OutletShowProps {

@@ -6,11 +6,20 @@ use App\Traits\BelongsToOutlet;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Outlet\Database\Factories\TypeOutletFactory;
 
 class TypeOutlet extends Model
 {
-    use HasFactory, BelongsToOutlet, HasUuid;
+    use HasFactory, BelongsToOutlet, HasUuid, SoftDeletes;
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
 
     /**
      * The attributes that are mass assignable.

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, type VNode } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { TableReusable, StatsCard } from '@/components/shared';
+import { TableReusable, StatsCard, ButtonGroup } from '@/components/shared';
 import type { TableColumn, TableAction, PaginationData } from '@/components/shared';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -13,22 +12,32 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Tag, CheckCircle, XCircle, Search, Eye, Pencil, Trash2 } from 'lucide-vue-next';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Tag, CheckCircle, XCircle, Eye, Pencil, Trash2, X, Download, Database } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
 import type { TypeOutlet, TypeOutletIndexProps } from '../../../types';
+import { toast } from '@/composables/useToast';
+
+// Persistent layout for momentum-modal
+defineOptions({
+    layout: (h: (type: unknown, props: unknown, children: unknown) => VNode, page: VNode) =>
+        h(AppLayout, {
+            breadcrumbs: [
+                { title: 'Dashboard', href: '/dashboard' },
+                { title: 'Outlets', href: '/dashboard/outlets' },
+                { title: 'Types', href: '/dashboard/outlet-types' },
+            ] as BreadcrumbItem[]
+        }, () => page),
+});
 
 const props = defineProps<TypeOutletIndexProps>();
 
-const { typeOutlets, filters, stats } = props;
+// Filter state
+const searchQuery = ref(props.filters.search || '');
+const statusFilter = ref(props.filters.status || '');
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Outlets', href: '/dashboard/outlets' },
-    { title: 'Types', href: '/dashboard/outlet-types' },
-];
-
-const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || 'all');
+// Selection state for bulk operations
+const selectedIds = ref<(string | number)[]>([]);
 
 const columns: TableColumn<TypeOutlet>[] = [
     {
@@ -44,7 +53,6 @@ const columns: TableColumn<TypeOutlet>[] = [
     {
         key: 'status',
         label: 'Status',
-        render: (type) => type.status,
     },
 ];
 
@@ -67,51 +75,86 @@ const actions: TableAction<TypeOutlet>[] = [
     },
 ];
 
-const pagination: PaginationData = {
+const pagination = computed<PaginationData>(() => ({
     current_page: props.typeOutlets.meta.current_page,
     last_page: props.typeOutlets.meta.last_page,
     per_page: props.typeOutlets.meta.per_page,
     total: props.typeOutlets.meta.total,
-};
+}));
 
 const handlePageChange = (page: number) => {
     router.get('/dashboard/outlet-types', {
         page,
-        per_page: pagination.per_page,
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        per_page: pagination.value.per_page,
+        search: searchQuery.value || undefined,
+        status: statusFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
 const handlePerPageChange = (perPage: number) => {
     router.get('/dashboard/outlet-types', {
+        page: 1,
         per_page: perPage,
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: searchQuery.value || undefined,
+        status: statusFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
-const handleSearch = () => {
+const handleSearch = (search: string) => {
+    searchQuery.value = search;
     router.get('/dashboard/outlet-types', {
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: search || undefined,
+        status: statusFilter.value || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
-watch(statusFilter, () => {
+const handleStatusFilter = (status: string | number | boolean | bigint | Record<string, unknown> | null | undefined) => {
+    const statusStr = String(status || 'all');
+    statusFilter.value = statusStr === 'all' ? '' : statusStr;
     router.get('/dashboard/outlet-types', {
-        search: search.value || undefined,
-        status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-    }, { preserveState: true });
+        search: searchQuery.value || undefined,
+        status: statusStr === 'all' ? undefined : statusStr,
+    }, { preserveState: true, preserveScroll: true });
+};
+
+// Check if any filters are active
+const hasActiveFilters = computed(() => {
+    return !!(searchQuery.value || statusFilter.value);
 });
+
+const handleClearFilters = () => {
+    searchQuery.value = '';
+    statusFilter.value = '';
+    router.get('/dashboard/outlet-types', {}, { preserveState: true, preserveScroll: true });
+};
 
 const handleCreate = () => {
     router.visit('/dashboard/outlet-types/create');
 };
+
+const openBulkDeleteDialog = () => {
+    const params = new URLSearchParams();
+    selectedIds.value.forEach((id) => {
+        params.append('ids[]', String(id));
+    });
+    router.visit(`/dashboard/outlet-types/bulk-delete?${params.toString()}`);
+};
+
+const handleStatusToggle = (type: TypeOutlet, newStatus: boolean) => {
+    router.put(`/dashboard/outlet-types/${type.id}/toggle-status`, {
+        status: newStatus ? 'active' : 'inactive',
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success(`Type ${newStatus ? 'activated' : 'deactivated'} successfully.`);
+        },
+    });
+};
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <div>
         <Head title="Outlet Types" />
 
         <div class="flex h-full flex-1 flex-col gap-6 p-6">
@@ -119,18 +162,18 @@ const handleCreate = () => {
             <div class="grid gap-4 md:grid-cols-3">
                 <StatsCard
                     title="Total Types"
-                    :value="stats.total"
+                    :value="props.stats.total"
                     :icon="Tag"
                 />
                 <StatsCard
                     title="Active"
-                    :value="stats.active"
+                    :value="props.stats.active"
                     :icon="CheckCircle"
                     variant="success"
                 />
                 <StatsCard
                     title="Inactive"
-                    :value="stats.inactive"
+                    :value="props.stats.inactive"
                     :icon="XCircle"
                     variant="warning"
                 />
@@ -143,46 +186,93 @@ const handleCreate = () => {
                         <h2 class="text-lg font-semibold">Outlet Types</h2>
                         <p class="text-sm text-muted-foreground">Manage outlet types</p>
                     </div>
-                    <Button @click="handleCreate">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Type
-                    </Button>
-                </div>
-
-                <!-- Filters -->
-                <div class="flex items-center gap-4">
-                    <div class="relative flex-1 max-w-sm">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            v-model="search"
-                            placeholder="Search types..."
-                            class="pl-9"
-                            @keyup.enter="handleSearch"
-                        />
+                    <div class="flex items-center gap-2">
+                        <ButtonGroup>
+                            <Button variant="default">
+                                <Database class="mr-2 h-4 w-4" />
+                                All
+                            </Button>
+                            <Button variant="outline" @click="router.visit('/dashboard/outlet-types/trash')">
+                                <Trash2 class="mr-2 h-4 w-4" />
+                                Trash
+                            </Button>
+                        </ButtonGroup>
+                        <Button variant="outline" as="a" href="/dashboard/outlet-types/export">
+                            <Download class="mr-2 h-4 w-4" />
+                            Export
+                        </Button>
+                        <Button @click="handleCreate">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add Type
+                        </Button>
                     </div>
-                    <Select v-model="statusFilter">
-                        <SelectTrigger class="w-[150px]">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                    </Select>
                 </div>
 
                 <!-- Table -->
                 <TableReusable
-                    :data="typeOutlets.data"
+                    v-model:selected="selectedIds"
+                    :data="props.typeOutlets.data"
                     :columns="columns"
                     :actions="actions"
                     :pagination="pagination"
-                    :searchable="false"
+                    :searchable="true"
+                    :selectable="true"
+                    select-key="id"
+                    search-placeholder="Search types..."
                     @page-change="handlePageChange"
                     @per-page-change="handlePerPageChange"
-                />
+                    @search="handleSearch"
+                >
+                    <!-- Bulk Actions -->
+                    <template #bulk-actions>
+                        <Button variant="destructive" size="sm" @click="openBulkDeleteDialog">
+                            <Trash2 class="mr-2 h-4 w-4" />
+                            Delete Selected
+                        </Button>
+                    </template>
+
+                    <!-- Toolbar slot for filters -->
+                    <template #toolbar>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Status Filter -->
+                            <Select :model-value="statusFilter || 'all'" @update:model-value="handleStatusFilter">
+                                <SelectTrigger class="w-[150px]">
+                                    <SelectValue placeholder="All Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <!-- Clear Filters Button -->
+                            <Button
+                                v-if="hasActiveFilters"
+                                variant="ghost"
+                                size="sm"
+                                @click="handleClearFilters"
+                                class="text-muted-foreground hover:text-foreground"
+                            >
+                                <X class="mr-1 h-4 w-4" />
+                                Clear Filters
+                            </Button>
+                        </div>
+                    </template>
+
+                    <template #cell-status="{ item }">
+                        <div class="flex items-center gap-2" @click.stop>
+                            <Switch
+                                :model-value="item.status === 'active'"
+                                @update:model-value="handleStatusToggle(item, $event)"
+                            />
+                            <span class="text-sm text-muted-foreground">
+                                {{ item.status === 'active' ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                    </template>
+                </TableReusable>
             </div>
         </div>
-    </AppLayout>
+    </div>
 </template>
