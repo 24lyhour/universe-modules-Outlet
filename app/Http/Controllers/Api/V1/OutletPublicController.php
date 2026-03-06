@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Modules\Outlet\Http\Resources\OutletResource;
 use Modules\Outlet\Models\Outlet;
 use Modules\Outlet\Services\OutletService;
+use Modules\Outlet\Models\TypeOutlet;
+use Modules\Product\Http\Resources\ProductResource;
+
 
 /**
  * Public API controller for outlets (no authentication required)
@@ -132,7 +135,7 @@ class OutletPublicController extends Controller
 
         return response()->json([
             'outlet' => new OutletResource($outlet),
-            'products' => \Modules\Product\Http\Resources\ProductResource::collection($products)
+            'products' => ProductResource::collection($products)
                 ->response()
                 ->getData(true),
         ]);
@@ -143,7 +146,7 @@ class OutletPublicController extends Controller
      */
     public function types(): JsonResponse
     {
-        $types = \Modules\Outlet\Models\TypeOutlet::where('is_active', true)
+        $types = TypeOutlet::where('is_active', true)
             ->select('id', 'name_type as name', 'description')
             ->get();
 
