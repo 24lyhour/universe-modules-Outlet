@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Outlet\Http\Controllers\Api\V1\Outlet;
+namespace Modules\Outlet\Http\Controllers\Api\V1\Customer\Outlet;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Outlet\Http\Controllers\Api\V1\Outlet\OutletApiController;
+use Modules\Outlet\Http\Controllers\Api\V1\Customer\Outlet\OutletApiController;
 
 // Outlet CRUD
 Route::apiResource('outlets', OutletApiController::class)
