@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Outlet\Http\Controllers\Api\V1\OutletApiController;
-use Modules\Outlet\Http\Controllers\Api\V1\OutletPublicController;
+use Modules\Outlet\Http\Controllers\Api\V1\Outlet\OutletApiController;
+use Modules\Outlet\Http\Controllers\Api\V1\Outlet\OutletPublicController;
 
 /*
 |--------------------------------------------------------------------------
