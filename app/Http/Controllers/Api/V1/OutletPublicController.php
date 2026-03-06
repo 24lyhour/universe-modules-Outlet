@@ -87,10 +87,16 @@ class OutletPublicController extends Controller
 
     /**
      * Get featured/popular outlets.
+     *
+     * @queryParam limit int Number of outlets to return. Default: 6
+     * @queryParam type_outlet_id int Filter by outlet type (1=Restaurant, 2=Cafe, etc.)
      */
     public function featured(Request $request): JsonResponse
     {
         $outlets = Outlet::where('status', 'active')
+            ->when($request->input('type_outlet_id'), function ($q, $typeId) {
+                $q->where('type_outlet_id', $typeId);
+            })
             ->withCount('products')
             ->orderByDesc('products_count')
             ->limit($request->integer('limit', 6))
