@@ -18,6 +18,7 @@ class OutletSeeder extends Seeder
         $restaurantType = TypeOutlet::where('name_type', 'Restaurant')->first();
         $cafeType = TypeOutlet::where('name_type', 'Cafe')->first();
         $fastFoodType = TypeOutlet::where('name_type', 'Fast Food')->first();
+        $storeType = TypeOutlet::where('name_type', 'Store')->first();
 
         if (!$restaurantType) {
             $this->command->warn('No type outlets found. Please run TypeOutletSeeder first.');
@@ -81,6 +82,18 @@ class OutletSeeder extends Seeder
                 'schedule_mode' => 'daily',
                 'schedule_start_time' => '08:00:00',
                 'schedule_end_time' => '23:00:00',
+                'schedule_status' => 'active',
+            ],
+            [
+                'name' => 'Tech Store',
+                'address' => 'Central Market, Phnom Penh, Cambodia',
+                'phone' => '+855 23 999 888',
+                'email' => 'techstore@example.com',
+                'type_outlet_id' => $storeType?->id ?? $restaurantType->id,
+                'status' => 'active',
+                'schedule_mode' => 'daily',
+                'schedule_start_time' => '09:00:00',
+                'schedule_end_time' => '20:00:00',
                 'schedule_status' => 'active',
             ],
         ];

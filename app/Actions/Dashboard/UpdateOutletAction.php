@@ -14,6 +14,12 @@ class UpdateOutletAction
     {
         $data['updated_by'] = Auth::id();
 
+        // Map outlet_type to type_outlet_id for database storage
+        if (isset($data['outlet_type'])) {
+            $data['type_outlet_id'] = $data['outlet_type'];
+            unset($data['outlet_type']);
+        }
+
         $outlet->update($data);
 
         return $outlet->fresh();

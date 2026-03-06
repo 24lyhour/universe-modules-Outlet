@@ -5,12 +5,19 @@ export interface TypeOutletOption {
     name: string;
 }
 
+export interface TypeOutletRelation {
+    id: number;
+    name: string;
+}
+
 export interface Outlet {
     id: number;
     uuid: string;
     name: string;
     outlet_type: string | null;
-    description:string | null;
+    type_outlet_id: number | null;
+    type_outlet?: TypeOutletRelation | null;
+    description: string | null;
     address: string | null;
     phone: string | null;
     email: string | null;

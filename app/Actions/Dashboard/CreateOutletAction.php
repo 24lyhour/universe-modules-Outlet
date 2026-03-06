@@ -16,6 +16,12 @@ class CreateOutletAction
         $data['uuid'] = (string) Str::uuid();
         $data['created_by'] = Auth::id();
 
+        // Map outlet_type to type_outlet_id for database storage
+        if (isset($data['outlet_type'])) {
+            $data['type_outlet_id'] = $data['outlet_type'];
+            unset($data['outlet_type']);
+        }
+
         return Outlet::create($data);
     }
 }

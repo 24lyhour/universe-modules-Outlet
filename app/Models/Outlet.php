@@ -2,11 +2,17 @@
 
 namespace Modules\Outlet\Models;
 
+use App\Models\Company;
 use App\Traits\HasUuid;
 use App\Traits\IsTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Menu\Models\Menu;
 use Modules\Outlet\Database\Factories\OutletFactory;
+use Modules\Product\Models\Product;
+use Modules\Product\Models\ProductType;
 
 class Outlet extends Model
 {
@@ -60,43 +66,42 @@ class Outlet extends Model
     }
 
     /**
-     * resltion to the product
+     * Relation to products.
      */
-    public function products()
+    public function products(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 
     /**
-     * relation to the menu
+     * Relation to menus.
      */
-    public function menu()
+    public function menus(): HasMany
     {
         return $this->hasMany(Menu::class);
     }
 
     /**
-     * RELATION TO THE COMPANY
+     * Relation to company.
      */
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
     /**
-     * Relation to the type outlet
+     * Relation to type outlet.
      */
-    public function typeOutlet()
+    public function typeOutlet(): BelongsTo
     {
         return $this->belongsTo(TypeOutlet::class);
     }
 
     /**
-     * relation to the prodcut type
+     * Relation to product types (outlet HAS MANY product types).
      */
-    public function productType() 
+    public function productTypes(): HasMany
     {
-    
-        return $this->belongTo(ProductType::class);
+        return $this->hasMany(ProductType::class);
     }
 }

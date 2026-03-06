@@ -48,9 +48,9 @@ const columns: TableColumn<Outlet>[] = [
         render: (outlet) => outlet.name,
     },
     {
-        key: 'outlet_type',
+        key: 'type_outlet',
         label: 'Type',
-        render: (outlet) => outlet.outlet_type || '-',
+        render: (outlet) => outlet.type_outlet?.name || '-',
     },
     {
         key: 'phone',

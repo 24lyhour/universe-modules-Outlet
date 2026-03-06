@@ -31,12 +31,17 @@ class OutletService
             $query->where('status', $filters['status']);
         }
 
-        // Outlet type filter
+        // Outlet type filter (legacy)
         if (!empty($filters['outlet_type'])) {
             $query->where('outlet_type', $filters['outlet_type']);
         }
 
-        return $query->latest()->paginate($perPage);
+        // Type outlet ID filter
+        if (!empty($filters['type_outlet_id'])) {
+            $query->where('type_outlet_id', $filters['type_outlet_id']);
+        }
+
+        return $query->with('typeOutlet')->latest()->paginate($perPage);
     }
 
     /**
