@@ -24,6 +24,8 @@ export interface Outlet {
     logo: string | null;
     image_url: string | null;
     google_map_url: string | null;
+    latitude: number | null;
+    longitude: number | null;
     url_deeplink: string | null;
     status: 'active' | 'inactive';
     schedule_mode: string | null;
@@ -73,6 +75,8 @@ export interface OutletFormData {
     logo: string;
     image_url: string;
     google_map_url: string;
+    latitude: number | null;
+    longitude: number | null;
     url_deeplink: string;
     status: 'active' | 'inactive';
     schedule_mode: string;

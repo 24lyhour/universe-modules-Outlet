@@ -28,6 +28,8 @@ class StoreOutletRequest extends FormRequest
             'logo' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string'],
             'google_map_url' => ['nullable', 'url', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'url_deeplink' => ['nullable', 'string', 'max:500'],
             'status' => ['required', 'in:active,inactive'],
             'schedule_mode' => ['nullable', 'string'],

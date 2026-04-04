@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { ImageUpload } from '@/components/shared';
+import { ImageUpload, GeofenceMap } from '@/components/shared';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { OutletFormData, TypeOutletOption } from '../../types';
 import TiptapEditor from '@/components/TiptapEditor.vue';
@@ -212,6 +212,38 @@ const isActive = computed({
                     <p v-if="model.errors.url_deeplink" class="text-sm text-destructive">
                         {{ model.errors.url_deeplink }}
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Section -->
+        <div class="space-y-4">
+            <div>
+                <h3 class="text-sm font-medium">Location</h3>
+                <p class="text-sm text-muted-foreground">Set outlet location on the map for delivery routing</p>
+            </div>
+            <Separator />
+
+            <GeofenceMap
+                :latitude="model.latitude"
+                :longitude="model.longitude"
+                mode="location"
+                height="500px"
+                @update:latitude="(val) => model.latitude = val"
+                @update:longitude="(val) => model.longitude = val"
+            />
+
+            <!-- Show coordinates if set -->
+            <div v-if="model.latitude && model.longitude" class="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
+                <div class="flex-1 grid grid-cols-2 gap-4">
+                    <div>
+                        <Label class="text-xs text-muted-foreground">Latitude</Label>
+                        <p class="font-mono text-sm">{{ model.latitude?.toFixed(6) }}</p>
+                    </div>
+                    <div>
+                        <Label class="text-xs text-muted-foreground">Longitude</Label>
+                        <p class="font-mono text-sm">{{ model.longitude?.toFixed(6) }}</p>
+                    </div>
                 </div>
             </div>
         </div>

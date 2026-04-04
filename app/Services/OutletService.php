@@ -42,7 +42,11 @@ class OutletService
             $query->where('type_outlet_id', $filters['type_outlet_id']);
         }
 
-        return $query->with('typeOutlet')->latest()->paginate($perPage);
+        return $query->with('typeOutlet')
+            ->withCount(['reviews' => fn($q) => $q->withoutGlobalScopes()])
+            ->withAvg(['reviews' => fn($q) => $q->withoutGlobalScopes()], 'overall_rating')
+            ->latest()
+            ->paginate($perPage);
     }
 
     /**

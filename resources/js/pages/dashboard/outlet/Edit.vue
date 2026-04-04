@@ -32,6 +32,8 @@ const form = useForm<OutletFormData>({
     logo: props.outlet.logo || '',
     image_url: props.outlet.image_url || '',
     google_map_url: props.outlet.google_map_url || '',
+    latitude: props.outlet.latitude ?? null,
+    longitude: props.outlet.longitude ?? null,
     url_deeplink: props.outlet.url_deeplink || '',
     status: props.outlet.status,
     schedule_mode: props.outlet.schedule_mode || '',
@@ -60,6 +62,8 @@ const getFormData = () => ({
     logo: form.logo || null,
     image_url: form.image_url || null,
     google_map_url: form.google_map_url || null,
+    latitude: form.latitude,
+    longitude: form.longitude,
     url_deeplink: form.url_deeplink || null,
     status: form.status,
     schedule_mode: form.schedule_mode || null,
@@ -100,7 +104,7 @@ const handleCancel = () => {
         title="Edit Outlet"
         description="Update outlet information"
         mode="edit"
-        size="xl"
+        size="2xl"
         submit-text="Save Changes"
         :loading="form.processing"
         :disabled="isFormInvalid"

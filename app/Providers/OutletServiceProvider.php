@@ -7,6 +7,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Outlet\Console\Commands\OutletCommand;
+use Modules\Outlet\Console\Commands\OutletScheduleCheckCommand;
+use Modules\Outlet\Console\Commands\OutletUpdateCoordsCommand;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -71,6 +73,8 @@ class OutletServiceProvider extends ServiceProvider
     {
         $this->commands([
             OutletCommand::class,
+            OutletScheduleCheckCommand::class,
+            OutletUpdateCoordsCommand::class,
         ]);
     }
 
@@ -80,8 +84,11 @@ class OutletServiceProvider extends ServiceProvider
     protected function registerCommandSchedules(): void
     {
         $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('inspire')->hourly();
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('outlet:schedule-check')
+                ->hourly()
+                ->name('outlet-schedule-check')
+                ->withoutOverlapping();
         });
     }
 

@@ -11,7 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Menu\Models\Menu;
+use Modules\Order\Models\Cart;
+use Modules\Order\Models\Order;
+use Modules\Order\Models\OutletReview;
 use Modules\Outlet\Database\Factories\OutletFactory;
+use Modules\Product\Models\Brand;
 use Modules\Product\Models\Product;
 use Modules\Product\Models\ProductType;
 
@@ -47,6 +51,8 @@ class Outlet extends Model
         'email',
         'logo',
         'google_map_url',
+        'latitude',
+        'longitude',
         'url_deeplink',
         'status',
         'schedule_mode',
@@ -104,5 +110,37 @@ class Outlet extends Model
     public function productTypes(): HasMany
     {
         return $this->hasMany(ProductType::class);
+    }
+
+    /**
+     * Relation to brands.
+     */
+    public function brands(): HasMany
+    {
+        return $this->hasMany(Brand::class);
+    }
+
+    /**
+     * Relation to carts.
+     */
+    public function carts(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * Relation to orders.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Relation to outlet reviews.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(OutletReview::class)->withoutGlobalScopes();
     }
 }

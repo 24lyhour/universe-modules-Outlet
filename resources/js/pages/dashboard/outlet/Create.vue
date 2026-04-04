@@ -32,6 +32,8 @@ const form = useForm<OutletFormData>({
     logo: '',
     image_url: '',
     google_map_url: '',
+    latitude: null,
+    longitude: null,
     url_deeplink: '',
     status: 'active',
     schedule_mode: '',
@@ -42,7 +44,6 @@ const form = useForm<OutletFormData>({
     schedule_end_date: '',
     schedule_status: '',
 });
-
 
 const { validateForm, validateAndSubmit, createIsFormInvalid } = useFormValidation(
     outletSchema,
@@ -59,6 +60,8 @@ const getFormData = () => ({
     logo: form.logo || null,
     image_url: form.image_url || null,
     google_map_url: form.google_map_url || null,
+    latitude: form.latitude,
+    longitude: form.longitude,
     url_deeplink: form.url_deeplink || null,
     status: form.status,
     schedule_mode: form.schedule_mode || null,
@@ -101,7 +104,7 @@ const handleCancel = () => {
         title="Create Outlet"
         description="Add a new outlet to your business"
         mode="create"
-        size="xl"
+        size="2xl"
         submit-text="Create Outlet"
         :loading="form.processing"
         :disabled="isFormInvalid"

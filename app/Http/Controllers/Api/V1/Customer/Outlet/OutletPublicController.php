@@ -17,6 +17,8 @@ class OutletPublicController extends Controller
             ->when($request->input('type_outlet_id'), fn($q, $id) => $q->where('type_outlet_id', $id))
             ->when($request->input('search'), fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->with('typeOutlet')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'overall_rating')
             ->orderBy('name')
             ->paginate($request->integer('per_page', 15));
 
@@ -30,6 +32,8 @@ class OutletPublicController extends Controller
         $outlet = Outlet::where('status', 'active')
             ->where('uuid', $uuid)
             ->with('typeOutlet')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'overall_rating')
             ->firstOrFail();
 
         return response()->json(['data' => new OutletResource($outlet)]);
@@ -37,8 +41,8 @@ class OutletPublicController extends Controller
 
     public function types(): JsonResponse
     {
-        $types = TypeOutlet::where('status', 'active')
-            ->select('id', 'uuid', 'name', 'slug', 'description')
+        $types = TypeOutlet::where('is_active', true)
+            ->select('id', 'uuid', 'name_type as name', 'description')
             ->get();
 
         return response()->json(['data' => $types]);
@@ -49,6 +53,8 @@ class OutletPublicController extends Controller
         $outlets = Outlet::where('status', 'active')
             ->when($request->input('q'), fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->with('typeOutlet')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'overall_rating')
             ->limit($request->integer('limit', 10))
             ->get();
 
@@ -60,6 +66,8 @@ class OutletPublicController extends Controller
         $outlets = Outlet::where('status', 'active')
             ->when($request->input('type_outlet_id'), fn($q, $id) => $q->where('type_outlet_id', $id))
             ->with('typeOutlet')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'overall_rating')
             ->limit($request->integer('limit', 6))
             ->latest()
             ->get();
