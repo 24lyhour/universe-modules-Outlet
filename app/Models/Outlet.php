@@ -64,8 +64,30 @@ class Outlet extends Model
         'schedule_status',
         'created_by',
         'updated_by',
+        'payway_merchant_id',
+        'payway_api_key',
+        'payway_enabled',
     ];
 
+    protected $casts = [
+        'payway_api_key' => 'encrypted',
+        'payway_enabled' => 'boolean',
+    ];
+
+    protected $hidden = [
+        'payway_merchant_id',
+        'payway_api_key',
+    ];
+
+    /**
+     * Check if outlet has its own PayWay merchant account.
+     */
+    public function hasPayWay(): bool
+    {
+        return $this->payway_enabled
+            && $this->payway_merchant_id
+            && $this->payway_api_key;
+    }
 
     protected static function newFactory(): OutletFactory
     {

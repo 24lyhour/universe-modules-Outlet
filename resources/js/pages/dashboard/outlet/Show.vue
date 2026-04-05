@@ -12,6 +12,7 @@ import {
     Clock,
     Link,
     ExternalLink,
+    Settings,
 } from 'lucide-vue-next';
 
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -25,6 +26,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { GeofenceMap } from '@/components/shared';
 import { type BreadcrumbItem } from '@/types';
 import type { OutletShowProps } from '../../../types';
 
@@ -65,6 +67,10 @@ const handleEdit = () => {
 
 const handleDelete = () => {
     router.visit(`/dashboard/outlets/${props.outlet.uuid}/delete`);
+};
+
+const handlePayWay = () => {
+    router.visit(`/dashboard/outlets/${props.outlet.uuid}/payway`);
 };
 </script>
 
@@ -182,6 +188,30 @@ const handleDelete = () => {
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Location Map -->
+                <Card v-if="outlet.latitude && outlet.longitude">
+                    <CardHeader>
+                        <CardTitle class="text-lg flex items-center gap-2">
+                            <MapPin class="h-4 w-4" />
+                            Location
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <GeofenceMap
+                            height="400px"
+                            :readonly="true"
+                            geofence-type="circle"
+                            :latitude="outlet.latitude"
+                            :longitude="outlet.longitude"
+                            :radius="100"
+                        />
+                        <div class="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>Lat: {{ outlet.latitude }}</span>
+                            <span>Lng: {{ outlet.longitude }}</span>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- Sidebar -->
@@ -232,6 +262,48 @@ const handleDelete = () => {
                             class="text-muted-foreground text-sm text-center py-2"
                         >
                             No schedule configured
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- PayWay -->
+                <Card>
+                    <CardHeader>
+                        <div class="flex items-center justify-between">
+                            <CardTitle class="text-lg flex items-center gap-2">
+                                <img src="/images/payments/aba_payway.svg" alt="ABA PayWay" class="h-6 w-6 rounded-full object-cover" />
+                                ABA PayWay
+                            </CardTitle>
+                            <Button variant="ghost" size="icon" class="h-8 w-8" @click="handlePayWay">
+                                <Settings class="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="space-y-3">
+                        <!-- Accepted payment methods -->
+                        <div class="flex items-center gap-2">
+                            <img src="/images/payments/aba_khqr.webp" alt="KHQR" class="h-7 rounded" />
+                            <img src="/images/payments/visa.svg" alt="Visa" class="h-7 rounded" />
+                            <img src="/images/payments/mastercard.svg" alt="Mastercard" class="h-7 rounded" />
+                            <img src="/images/payments/jcb.svg" alt="JCB" class="h-7 rounded" />
+                        </div>
+                        <Separator />
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">Status</span>
+                            <Badge :variant="outlet.payway_enabled ? 'default' : 'secondary'">
+                                {{ outlet.payway_enabled ? 'Enabled' : 'Disabled' }}
+                            </Badge>
+                        </div>
+                        <div v-if="outlet.payway_merchant_id" class="flex justify-between">
+                            <span class="text-muted-foreground">Merchant ID</span>
+                            <span class="font-mono text-sm">{{ outlet.payway_merchant_id }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-muted-foreground">API Key</span>
+                            <span class="text-sm">{{ outlet.has_payway_key ? '••••••••' : 'Not set' }}</span>
+                        </div>
+                        <div v-if="!outlet.payway_merchant_id" class="text-muted-foreground text-sm text-center py-2">
+                            No PayWay merchant configured
                         </div>
                     </CardContent>
                 </Card>

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Store, CheckCircle, XCircle, Eye, Pencil, Trash2, Clock, CalendarClock, X, Download, Database } from 'lucide-vue-next';
+import { Plus, Store, CheckCircle, XCircle, Eye, Pencil, Trash2, Clock, CalendarClock, X, Download, Database, CreditCard } from 'lucide-vue-next';
 import { ButtonGroup } from '@/components/shared';
 import type { BreadcrumbItem } from '@/types';
 import type { OutletIndexProps, Outlet } from '../../../types';
@@ -93,6 +93,11 @@ const actions: TableAction<Outlet>[] = [
         label: 'Schedule',
         icon: Clock,
         onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}/schedule`),
+    },
+    {
+        label: 'PayWay',
+        icon: CreditCard,
+        onClick: (outlet) => router.visit(`/dashboard/outlets/${outlet.uuid}/payway`),
     },
     {
         label: 'Delete',

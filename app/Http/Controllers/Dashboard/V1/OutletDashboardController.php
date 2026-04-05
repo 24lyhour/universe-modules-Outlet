@@ -76,6 +76,8 @@ class OutletDashboardController extends Controller
      */
     public function show(Outlet $outlet): Response
     {
+        $outlet->load('typeOutlet');
+
         return Inertia::render('outlet::dashboard/outlet/Show', [
             'outlet' => (new OutletResource($outlet))->resolve(),
         ]);
