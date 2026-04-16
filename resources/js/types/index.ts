@@ -35,6 +35,9 @@ export interface Outlet {
     schedule_start_date: string | null;
     schedule_end_date: string | null;
     schedule_status: string | null;
+    payway_merchant_id: string | null;
+    payway_enabled: boolean;
+    has_payway_key: boolean;
     created_at: string;
     updated_at: string;
 }

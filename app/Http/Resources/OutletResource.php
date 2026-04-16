@@ -17,7 +17,7 @@ class OutletResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             'description' => $this->description,
-            'outlet_type' => $this->type_outlet_id ? (string) $this->type_outlet_id : null,
+            'outlet_type' => $this->whenLoaded('typeOutlet', fn () => $this->typeOutlet?->name_type, null),
             'type_outlet_id' => $this->type_outlet_id,
             'address' => $this->address,
             'phone' => $this->phone,
@@ -38,6 +38,11 @@ class OutletResource extends JsonResource
             'schedule_start_date' => $this->schedule_start_date,
             'schedule_end_date' => $this->schedule_end_date,
             'schedule_status' => $this->schedule_status,
+
+            // PayWay merchant
+            'payway_merchant_id' => $this->payway_merchant_id,
+            'payway_enabled' => (bool) $this->payway_enabled,
+            'has_payway_key' => !empty($this->payway_api_key),
 
             // Computed fields
             'is_open' => $this->when($this->schedule_status !== null, fn() => $this->isCurrentlyOpen()),

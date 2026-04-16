@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Outlet\Http\Controllers\Dashboard\V1\OutletDashboardController;
+use Modules\Outlet\Http\Controllers\Dashboard\V1\OutletPayWayController;
 use Modules\Outlet\Http\Controllers\Dashboard\V1\OutletScheduleController;
 use Modules\Outlet\Http\Controllers\Dashboard\V1\OutletStatusController;
 use Modules\Outlet\Http\Controllers\Dashboard\V1\TypeOutletDashboardController;
@@ -19,6 +20,13 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::put('outlets/{outlet}/toggle-status', OutletStatusController::class)->name('outlets.toggle-status');
     Route::get('outlets/{outlet}/schedule', [OutletScheduleController::class, 'show'])->name('outlets.schedule');
     Route::put('outlets/{outlet}/schedule', [OutletScheduleController::class, 'update'])->name('outlets.update-schedule');
+
+    // Outlets - PayWay Merchant
+    Route::get('outlets/{outlet}/payway', [OutletPayWayController::class, 'show'])->name('outlets.payway');
+    Route::put('outlets/{outlet}/payway', [OutletPayWayController::class, 'update'])->name('outlets.payway.update');
+    Route::post('outlets/{outlet}/payway/test', [OutletPayWayController::class, 'test'])->name('outlets.payway.test');
+    Route::put('outlets/{outlet}/payway/toggle', [OutletPayWayController::class, 'toggle'])->name('outlets.payway.toggle');
+    Route::delete('outlets/{outlet}/payway', [OutletPayWayController::class, 'destroy'])->name('outlets.payway.destroy');
 
     // Outlets - Trash Operations
     Route::post('outlets/{outlet}/restore', [OutletDashboardController::class, 'restore'])->name('outlets.restore');
