@@ -115,6 +115,19 @@ const handlePayWay = () => {
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-4">
+                            <!-- Cover image — render at native size, don't upscale -->
+                            <div v-if="outlet.cover_image">
+                                <h4 class="mb-2 text-sm font-medium text-muted-foreground">Cover Image</h4>
+                                <div class="flex w-full justify-center overflow-hidden rounded-lg border bg-muted/30">
+                                    <img
+                                        :src="outlet.cover_image"
+                                        :alt="`${outlet.name} cover`"
+                                        class="block h-auto max-h-[420px] max-w-full object-contain"
+                                        decoding="async"
+                                    />
+                                </div>
+                            </div>
+
                             <!-- Logo -->
                             <div>
                                 <h4 class="text-sm font-medium text-muted-foreground mb-2">Logo</h4>

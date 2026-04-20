@@ -23,6 +23,7 @@ class OutletResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'logo' => $this->logo,
+            'cover_image' => $this->cover_image,
             'image_url' => $this->image_url,
             'google_map_url' => $this->google_map_url,
             'latitude' => $this->latitude ? (float) $this->latitude : null,

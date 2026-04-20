@@ -26,6 +26,7 @@ class UpdateOutletRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
             'logo' => ['nullable', 'string'],
+            'cover_image' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string'],
             'google_map_url' => ['nullable', 'url', 'max:500'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],

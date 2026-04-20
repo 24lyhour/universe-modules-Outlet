@@ -50,6 +50,7 @@ class Outlet extends Model
         'product_id',
         'email',
         'logo',
+        'cover_image',
         'google_map_url',
         'latitude',
         'longitude',

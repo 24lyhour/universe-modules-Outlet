@@ -24,12 +24,13 @@ const isOpen = computed({
 
 const form = useForm<OutletFormData>({
     name: props.outlet.name,
-    outlet_type: props.outlet.outlet_type || '',
+    outlet_type: props.outlet.type_outlet_id ? String(props.outlet.type_outlet_id) : '',
     description: props.outlet.description || '',
     address: props.outlet.address || '',
     phone: props.outlet.phone || '',
     email: props.outlet.email || '',
     logo: props.outlet.logo || '',
+    cover_image: props.outlet.cover_image || '',
     image_url: props.outlet.image_url || '',
     google_map_url: props.outlet.google_map_url || '',
     latitude: props.outlet.latitude ?? null,
@@ -60,6 +61,7 @@ const getFormData = () => ({
     phone: form.phone || null,
     email: form.email || null,
     logo: form.logo || null,
+    cover_image: form.cover_image || null,
     image_url: form.image_url || null,
     google_map_url: form.google_map_url || null,
     latitude: form.latitude,

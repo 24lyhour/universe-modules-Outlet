@@ -20,48 +20,23 @@ class TypeOutletSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name_type' => 'Cafe',
-                'description' => 'Coffee shop and light refreshments',
-                'is_active' => true,
-            ],
-            [
                 'name_type' => 'Fast Food',
                 'description' => 'Quick service restaurant',
                 'is_active' => true,
             ],
             [
-                'name_type' => 'Bar',
-                'description' => 'Beverage and drinks establishment',
+                'name_type' => 'Beverages',
+                'description' => 'Drinks, juices, and beverage shop',
                 'is_active' => true,
             ],
             [
-                'name_type' => 'Bakery',
-                'description' => 'Fresh baked goods and pastries',
-                'is_active' => true,
-            ],
-            [
-                'name_type' => 'Food Truck',
-                'description' => 'Mobile food service',
+                'name_type' => 'Food',
+                'description' => 'General food service outlet',
                 'is_active' => true,
             ],
             [
                 'name_type' => 'Store',
                 'description' => 'Retail store outlet',
-                'is_active' => true,
-            ],
-            [
-                'name_type' => 'Warehouse',
-                'description' => 'Storage and distribution center',
-                'is_active' => true,
-            ],
-            [
-                'name_type' => 'Kiosk',
-                'description' => 'Small retail booth or stand',
-                'is_active' => true,
-            ],
-            [
-                'name_type' => 'Office',
-                'description' => 'Administrative office location',
                 'is_active' => true,
             ],
         ];

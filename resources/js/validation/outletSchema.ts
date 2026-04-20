@@ -28,6 +28,7 @@ export const outletSchema = z.object({
         .nullable()
         .or(z.literal('')),
     logo: z.string().optional().nullable(),
+    cover_image: z.string().optional().nullable(),
     image_url: z.string().optional().nullable(),
     google_map_url: z
         .string()

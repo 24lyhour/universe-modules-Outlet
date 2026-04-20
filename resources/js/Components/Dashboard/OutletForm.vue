@@ -36,6 +36,14 @@ const logoImages = computed({
     },
 });
 
+// Cover image adapter (same pattern)
+const coverImages = computed({
+    get: () => model.value.cover_image ? [model.value.cover_image] : [],
+    set: (value: string[]) => {
+        model.value.cover_image = value.length > 0 ? value[0] : '';
+    },
+});
+
 // Convert status string to boolean for Switch component
 const isActive = computed({
     get: () => model.value.status === 'active',
@@ -161,22 +169,39 @@ const isActive = computed({
             </div>
         </div>
 
-        <!-- Logo Section -->
+        <!-- Logo & Cover Image Section -->
         <div class="space-y-4">
             <div>
-                <h3 class="text-sm font-medium">Logo</h3>
-                <p class="text-sm text-muted-foreground">Upload outlet logo</p>
+                <h3 class="text-sm font-medium">Branding</h3>
+                <p class="text-sm text-muted-foreground">Logo and cover image for this outlet</p>
             </div>
             <Separator />
 
-            <ImageUpload
-                v-model="logoImages"
-                label=""
-                :multiple="false"
-                :max-files="1"
-                :max-size="5"
-                :error="model.errors.logo"
-            />
+            <div class="grid gap-6 sm:grid-cols-2">
+                <div class="space-y-2">
+                    <Label>Logo</Label>
+                    <ImageUpload
+                        v-model="logoImages"
+                        label=""
+                        :multiple="false"
+                        :max-files="1"
+                        :max-size="5"
+                        :error="model.errors.logo"
+                    />
+                </div>
+
+                <div class="space-y-2">
+                    <Label>Cover Image</Label>
+                    <ImageUpload
+                        v-model="coverImages"
+                        label=""
+                        :multiple="false"
+                        :max-files="1"
+                        :max-size="5"
+                        :error="model.errors.cover_image"
+                    />
+                </div>
+            </div>
         </div>
 
         <!-- Links Section -->

@@ -22,6 +22,7 @@ export interface Outlet {
     phone: string | null;
     email: string | null;
     logo: string | null;
+    cover_image: string | null;
     image_url: string | null;
     google_map_url: string | null;
     latitude: number | null;
@@ -76,6 +77,7 @@ export interface OutletFormData {
     phone: string;
     email: string;
     logo: string;
+    cover_image: string;
     image_url: string;
     google_map_url: string;
     latitude: number | null;
