@@ -85,4 +85,12 @@ class TypeOutlet extends Model
     {
         return $this->belongsTo(Outlet::class);
     }
+
+    /**
+     * relation to outlets
+     */
+    public function outlets()
+    {
+        return $this->hasMany(Outlet::class, 'type_outlet_id');
+    }
 }

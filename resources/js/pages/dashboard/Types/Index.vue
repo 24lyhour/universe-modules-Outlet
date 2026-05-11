@@ -46,6 +46,12 @@ const columns: TableColumn<TypeOutlet>[] = [
         render: (type) => type.name,
     },
     {
+        key: 'outlets_count',
+        label: 'Outlets',
+        render: (type) => type.outlets_count || 0,
+        align: 'center',
+    },
+    {
         key: 'description',
         label: 'Description',
         render: (type) => type.description || '-',

@@ -30,7 +30,7 @@ class TypeOutletService
             $query->where('is_active', $isActive);
         }
 
-        return $query->latest()->paginate($perPage);
+        return $query->withCount('outlets')->latest()->paginate($perPage);
     }
 
     /**

@@ -118,6 +118,7 @@ export interface TypeOutlet {
     id: number;
     name: string;
     description: string | null;
+    outlets_count?: number;
     status: 'active' | 'inactive';
     created_at: string;
     updated_at: string;

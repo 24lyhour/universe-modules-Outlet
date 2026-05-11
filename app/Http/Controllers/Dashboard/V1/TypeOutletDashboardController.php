@@ -37,6 +37,7 @@ class TypeOutletDashboardController extends Controller
                 'id' => $item->id,
                 'name' => $item->name_type,
                 'description' => $item->description,
+                'outlets_count' => $item->outlets_count,
                 'status' => $item->is_active ? 'active' : 'inactive',
                 'created_at' => $item->created_at->toISOString(),
                 'updated_at' => $item->updated_at->toISOString(),
