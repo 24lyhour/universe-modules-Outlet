@@ -5,6 +5,8 @@ namespace Modules\Outlet\Http\Controllers\Api\V1\Customer\Outlet;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Menu\Actions\Api\V1\GetMenusAction;
+use Modules\Menu\Http\Resources\Api\V1\MenuResource;
 use Modules\Outlet\Http\Resources\OutletResource;
 use Modules\Outlet\Models\Outlet;
 use Modules\Outlet\Models\TypeOutlet;
@@ -27,7 +29,7 @@ class OutletPublicController extends Controller
         );
     }
 
-    public function show(string $uuid): JsonResponse
+    public function show(Request $request, string $uuid, GetMenusAction $menusAction): JsonResponse
     {
         $outlet = Outlet::where('status', 'active')
             ->where('uuid', $uuid)
@@ -36,7 +38,19 @@ class OutletPublicController extends Controller
             ->withAvg('reviews', 'overall_rating')
             ->firstOrFail();
 
-        return response()->json(['data' => new OutletResource($outlet)]);
+        // Eager-load menus (with schedule + mute filters applied) so the
+        // customer outlet detail page can render the full restaurant menu
+        // in one round-trip instead of a second /menus request.
+        $menus = $menusAction->execute($outlet->id);
+
+        // Serialize each piece through the standard resource pipeline so
+        // whenLoaded() / whenCounted() / etc. behave correctly, then merge.
+        $outletData = (new OutletResource($outlet))->resolve($request);
+        $menusData = MenuResource::collection($menus)->resolve($request);
+
+        return response()->json([
+            'data' => $outletData + ['menus' => $menusData],
+        ]);
     }
 
     public function types(): JsonResponse

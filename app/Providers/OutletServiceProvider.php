@@ -2,11 +2,12 @@
 
 namespace Modules\Outlet\Providers;
 
-use App\Services\MenuService;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Outlet\Console\Commands\OutletCommand;
+use Modules\Outlet\Http\Middleware\DashboardMiddlewareHandle;
 use Modules\Outlet\Console\Commands\OutletScheduleCheckCommand;
 use Modules\Outlet\Console\Commands\OutletUpdateCoordsCommand;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -32,29 +33,17 @@ class OutletServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-        $this->registerMenuItems();
+        $this->registerDashboardMiddleware();
     }
 
     /**
-     * Register menu items for the Outlet module.
+     * Sidebar entries live in DashboardMiddlewareHandle.
      */
-    protected function registerMenuItems(): void
+    protected function registerDashboardMiddleware(): void
     {
-        $this->app->booted(function () {
-            MenuService::addMenuItem(
-                menu: 'primary',
-                id: 'outlet',
-                title: __('Outlet'),
-                url: route('outlet.outlets.index'),
-                icon: 'Building2',
-                order: 50,
-                permissions: 'outlets.view_any',
-                route: 'outlet.*'
-            );
-
-            MenuService::addSubmenuItem('primary', 'outlet', __('Outlets'), route('outlet.outlets.index'), 10, 'outlets.view_any', 'outlet.outlets.*', 'Building2');
-            MenuService::addSubmenuItem('primary', 'outlet', __('Outlet Types'), route('outlet.outlet-types.index'), 20, 'outlet_types.view_any', 'outlet.outlet-types.*', 'LayoutGrid');
-        });
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
+        $kernel = $this->app->make(HttpKernel::class);
+        $kernel->prependMiddlewareToGroup('web', DashboardMiddlewareHandle::class);
     }
 
     /**
